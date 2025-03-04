@@ -1,4 +1,11 @@
+# dev
 .ddev/
 .vscode/
 .idea/
+
+# generated
 node_modules/
+
+# build
+images/
+imageUrls.txt
