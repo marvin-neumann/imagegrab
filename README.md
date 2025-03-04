@@ -1,4 +1,8 @@
-# DDEV Config
+# ImageGrab 
+
+ImageGrab uses the Puppeteer library to extract image URLs from a webpage and save them to a folder. 
+
+## DDEV Config
 
 -  add to `.ddev/config.yaml`
 
