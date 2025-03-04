@@ -1,0 +1,4 @@
+.ddev/
+.vscode/
+.idea/
+node_modules/
