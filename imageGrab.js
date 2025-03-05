@@ -31,6 +31,19 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
         return [...new Set(urls)];
     });
 
+    // Modify image URLs to remove "__Fill" or "__Crop" and succeeding characters until the first dot
+    const modifiedImageUrls = imageUrls.map(url => {
+        const fillIndex = url.indexOf('__Fill');
+        const cropIndex = url.indexOf('__Crop');
+        if (fillIndex !== -1) {
+            const dotIndex = url.indexOf('.', fillIndex);
+            return url.substring(0, fillIndex) + url.substring(dotIndex);
+        } else if (cropIndex !== -1) {
+            const dotIndex = url.indexOf('.', cropIndex);
+            return url.substring(0, cropIndex) + url.substring(dotIndex);
+        }
+        return url;
+    });
     // Create the images directory if it doesn't exist
     const imagesDir = path.resolve(__dirname, 'images');
     if (!fs.existsSync(imagesDir)) {
@@ -38,7 +51,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     }
 
     // Download each image and save it to the images directory
-    for (const imageUrl of imageUrls) {
+    for (const imageUrl of modifiedImageUrls) {
         const options = {
             url: imageUrl,
             dest: path.join(imagesDir, path.basename(imageUrl))
