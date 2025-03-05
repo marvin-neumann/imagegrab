@@ -48,28 +48,39 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
         }
         return url;
     });
+    
     // Create the images directory if it doesn't exist
-    const imagesDir = path.resolve(__dirname, 'images');
+    const imagesDir = path.resolve(__dirname, 'grabbedImages');
     if (!fs.existsSync(imagesDir)) {
         fs.mkdirSync(imagesDir);
     }
 
     // Download each image and save it to the images directory
     for (const imageUrl of modifiedImageUrls) {
-        const options = {
-            url: imageUrl,
-            dest: path.join(imagesDir, path.basename(imageUrl))
-        };
-
         try {
+            const urlPath = new URL(imageUrl).pathname;
+            const subDir = path.dirname(urlPath);
+            const destDir = path.join(imagesDir, subDir);
+
+            // Create subdirectories if they don't exist
+            if (!fs.existsSync(destDir)) {
+                fs.mkdirSync(destDir, { recursive: true });
+            }
+
+            const options = {
+                url: imageUrl,
+                dest: path.join(destDir, path.basename(imageUrl))
+            };
+
             await download.image(options);
             console.log(`Downloaded ${imageUrl}`);
         } catch (error) {
             console.error(`Failed to download ${imageUrl}: ${error.message}`);
         }
     }
+
     // Save the image URLs to a text file
-    fs.writeFileSync('imageUrls.txt', imageUrls.join('\n'));
+    fs.writeFileSync('grabbedImages.txt', imageUrls.join('\n'));
 
     console.log('Image URLs saved to imageUrls.txt');
 

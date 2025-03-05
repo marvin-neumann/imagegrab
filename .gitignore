@@ -7,5 +7,5 @@
 node_modules/
 
 # output
-images/
-imageUrls.txt
+grabbedImages/
+grabbedImages.txt
