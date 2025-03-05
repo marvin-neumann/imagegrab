@@ -35,11 +35,15 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     const modifiedImageUrls = imageUrls.map(url => {
         const fillIndex = url.indexOf('__Fill');
         const cropIndex = url.indexOf('__Crop');
+        const scaleIndex = url.indexOf('__Scale');
         if (fillIndex !== -1) {
             const dotIndex = url.indexOf('.', fillIndex);
             return url.substring(0, fillIndex) + url.substring(dotIndex);
         } else if (cropIndex !== -1) {
             const dotIndex = url.indexOf('.', cropIndex);
+            return url.substring(0, cropIndex) + url.substring(dotIndex);
+        } else if (scaleIndex !== -1) {
+            const dotIndex = url.indexOf('.', scaleIndex);
             return url.substring(0, cropIndex) + url.substring(dotIndex);
         }
         return url;
