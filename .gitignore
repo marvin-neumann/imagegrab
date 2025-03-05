@@ -3,9 +3,9 @@
 .vscode/
 .idea/
 
-# generated
+# packages
 node_modules/
 
-# build
+# output
 images/
 imageUrls.txt
