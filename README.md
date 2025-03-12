@@ -26,3 +26,11 @@ webimage_extra_packages: [chromium]
 ## How to run
 - install packages `npm install`
 - run `node imageGrab.js --url=https://www.example.com`
+
+### Parameters
+
+ - `--url` url of the page to grab the images
+ - `--type` optional, 
+    - default type is `default` and will download all images, 
+    - `ss3` and `ss4` downloads only the origial images and ignores scaled and cropped images
+ - `--log` optional, default is false, if true Logs the modified image URLs to a file along with the original URL and type
