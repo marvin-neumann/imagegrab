@@ -70,7 +70,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
                 return url.substring(0, cropIndex) + url.substring(slashIndex);
             } else if (scaleIndex !== -1) {
                 const slashIndex = url.indexOf('/', scaleIndex);
-                return url.substring(0, cropIndex) + url.substring(slashIndex);
+                return url.substring(0, scaleIndex) + url.substring(slashIndex);
             }
             return url;
         });
