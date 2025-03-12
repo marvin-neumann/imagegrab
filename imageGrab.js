@@ -110,7 +110,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     }
 
     // Save the image URLs to a text file
-    fs.writeFileSync('grabbedImages.txt', imageUrls.join('\n'));
+    fs.writeFileSync('grabbedImages.txt', modifiedImageUrls.join('\n'));
 
     console.log('Image URLs saved to imageUrls.txt');
 
