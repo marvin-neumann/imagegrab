@@ -2,10 +2,10 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const minimist = require('minimist');
 const path = require('path');
-const download = require('image-downloader');
 const { ss3Images } = require('./ss3Images');
 const { ss4Images } = require('./ss4Images');
 const { logImageUrlsToFile } = require('./logImageUrlsToFile');
+const { downloadImages } = require('./downloadImages');
 
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
@@ -73,28 +73,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     }
 
     // Download each image and save it to the images directory
-    for (const imageUrl of modifiedImageUrls) {
-        try {
-            const urlPath = new URL(imageUrl).pathname;
-            const subDir = path.dirname(urlPath);
-            const destDir = path.join(domainDir, subDir);
-
-            // Create subdirectories if they don't exist
-            if (!fs.existsSync(destDir)) {
-                fs.mkdirSync(destDir, { recursive: true });
-            }
-
-            const options = {
-                url: imageUrl,
-                dest: path.join(destDir, path.basename(imageUrl))
-            };
-
-            await download.image(options);
-            console.log(`Downloaded ${imageUrl}`);
-        } catch (error) {
-            console.error(`Failed to download ${imageUrl}: ${error.message}`);
-        }
-    }
+    await downloadImages(modifiedImageUrls, domainDir);
 
     if (log !== 'false') {
         // Save the image URLs to a text file
@@ -103,6 +82,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
 
     await browser.close();
 })();
+
 
 
 
