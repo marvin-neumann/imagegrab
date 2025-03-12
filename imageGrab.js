@@ -3,6 +3,8 @@ const fs = require('fs');
 const minimist = require('minimist');
 const path = require('path');
 const download = require('image-downloader');
+const { ss3Images } = require('./ss3Images');
+const { ss4Images } = require('./ss4Images');
 
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
@@ -96,45 +98,4 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     await browser.close();
 })();
 
-function ss4Images(imageUrls) {
-    modifiedImageUrls = imageUrls.map(url => {
-        const fillIndex = url.indexOf('__Fill');
-        const cropIndex = url.indexOf('__Crop');
-        const scaleIndex = url.indexOf('__Scale');
-        if (fillIndex !== -1) {
-            const dotIndex = url.indexOf('.', fillIndex);
-            return url.substring(0, fillIndex) + url.substring(dotIndex);
-        } else if (cropIndex !== -1) {
-            const dotIndex = url.indexOf('.', cropIndex);
-            return url.substring(0, scaleIndex) + url.substring(dotIndex);
-        } else if (scaleIndex !== -1) {
-            const dotIndex = url.indexOf('.', scaleIndex);
-            return url.substring(0, cropIndex) + url.substring(dotIndex);
-        }
-        return url;
-    });
-
-    return modifiedImageUrls;
-}
-
-function ss3Images(imageUrls) {
-    modifiedImageUrls = imageUrls.map(url => {
-        const fillIndex = url.indexOf('/_resampled/Fill');
-        const cropIndex = url.indexOf('/_resampled/Crop');
-        const scaleIndex = url.indexOf('/_resampled/Scale');
-        if (fillIndex !== -1) {
-            const slashIndex = url.indexOf('/', fillIndex);
-            return url.substring(0, fillIndex) + url.substring(slashIndex);
-        } else if (cropIndex !== -1) {
-            const slashIndex = url.indexOf('/', cropIndex);
-            return url.substring(0, cropIndex) + url.substring(slashIndex);
-        } else if (scaleIndex !== -1) {
-            const slashIndex = url.indexOf('/', scaleIndex);
-            return url.substring(0, scaleIndex) + url.substring(slashIndex);
-        }
-        return url;
-    });
-
-    return modifiedImageUrls;
-}
 
