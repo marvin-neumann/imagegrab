@@ -11,9 +11,7 @@ const { logImageUrlsToFile } = require('./app/logImageUrlsToFile');
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
 const url = args.url || process.argv[2]; // Default URL if --url parameter is not provided
-exports.url = url;
 const type = args.type || 'default'; // Optional type parameter with default value 'default'
-exports.type = type;
 const log = args.log || 'false'; // Optional log parameter with default value 'false'
 if (!url) {
     console.error('Please provide a URL as a command-line parameter');
