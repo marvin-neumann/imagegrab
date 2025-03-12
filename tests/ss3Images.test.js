@@ -1,4 +1,4 @@
-const { ss3Images } = require('./ss3Images');
+const { ss3Images } = require('../app/ss3Images');
 
 describe('ss3Images', () => {
     test('should remove /_resampled/Fill from URLs', () => {

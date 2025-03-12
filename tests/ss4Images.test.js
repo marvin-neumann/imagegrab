@@ -1,4 +1,4 @@
-const { ss4Images } = require('./ss4Images');
+const { ss4Images } = require('../app/ss4Images');
 
 describe('ss4Images', () => {
     test('should remove __Fill from URLs', () => {

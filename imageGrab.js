@@ -3,10 +3,10 @@ const fs = require('fs');
 const minimist = require('minimist');
 const path = require('path');
 const download = require('image-downloader');
-const { ss3Images } = require('./ss3Images');
-const { ss4Images } = require('./ss4Images');
-const { downloadImages } = require('./downloadImages');
-const { logImageUrlsToFile } = require('./logImageUrlsToFile');
+const { ss3Images } = require('./app/ss3Images');
+const { ss4Images } = require('./app/ss4Images');
+const { downloadImages } = require('./app/downloadImages');
+const { logImageUrlsToFile } = require('./app/logImageUrlsToFile');
 
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
