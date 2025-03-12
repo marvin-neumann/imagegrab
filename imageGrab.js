@@ -5,17 +5,24 @@ const path = require('path');
 const download = require('image-downloader');
 const { ss3Images } = require('./ss3Images');
 const { ss4Images } = require('./ss4Images');
+const { logImageUrlsToFile } = require('./logImageUrlsToFile');
 
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
 const url = args.url || process.argv[2]; // Default URL if --url parameter is not provided
+exports.url = url;
 const type = args.type || 'default'; // Optional type parameter with default value 'default'
+exports.type = type;
+const log = args.log || 'false'; // Optional log parameter with default value 'false'
 if (!url) {
     console.error('Please provide a URL as a command-line parameter');
     process.exit(1);
 }
 if (!type) {
-    console.error('No type given as a command-line parameter, using `default` type.');
+    console.error('No type given as a command-line parameter, using `default`.');
+}
+if (!log) {
+    console.error('No log given as a command-line parameter, using `false`.');
 }
 
 // Read Puppeteer options from JSON file
@@ -89,13 +96,13 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
         }
     }
 
-    // Save the image URLs to a text file
-    const fileContent = `URL: ${url}\nType: ${type}\n\n${modifiedImageUrls.join('\n')}`;
-    fs.writeFileSync('grabbedImages.txt', fileContent);
-
-    console.log('Image URLs saved to grabbedImages.txt');
+    if (log !== 'false') {
+        // Save the image URLs to a text file
+        logImageUrlsToFile(modifiedImageUrls);
+    }
 
     await browser.close();
 })();
+
 
 
