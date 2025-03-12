@@ -63,14 +63,14 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
             const cropIndex = url.indexOf('/_resampled/Crop');
             const scaleIndex = url.indexOf('/_resampled/Scale');
             if (fillIndex !== -1) {
-                const dotIndex = url.indexOf('/', fillIndex);
-                return url.substring(0, fillIndex) + url.substring(dotIndex);
+                const slashIndex = url.indexOf('/', fillIndex);
+                return url.substring(0, fillIndex) + url.substring(slashIndex);
             } else if (cropIndex !== -1) {
-                const dotIndex = url.indexOf('/', cropIndex);
-                return url.substring(0, cropIndex) + url.substring(dotIndex);
+                const slashIndex = url.indexOf('/', cropIndex);
+                return url.substring(0, cropIndex) + url.substring(slashIndex);
             } else if (scaleIndex !== -1) {
-                const dotIndex = url.indexOf('/', scaleIndex);
-                return url.substring(0, cropIndex) + url.substring(dotIndex);
+                const slashIndex = url.indexOf('/', scaleIndex);
+                return url.substring(0, cropIndex) + url.substring(slashIndex);
             }
             return url;
         });
