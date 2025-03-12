@@ -35,47 +35,19 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
         return [...new Set(urls)];
     });
 
-    let modifiedImageUrls = imageUrls;
+    let modifiedImageUrls = [];
     if (type === 'ss4') {
-        // Modify image URLs to remove "__Fill" or "__Crop" and succeeding characters until the first dot
-        modifiedImageUrls = imageUrls.map(url => {
-            const fillIndex = url.indexOf('__Fill');
-            const cropIndex = url.indexOf('__Crop');
-            const scaleIndex = url.indexOf('__Scale');
-            if (fillIndex !== -1) {
-                const dotIndex = url.indexOf('.', fillIndex);
-                return url.substring(0, fillIndex) + url.substring(dotIndex);
-            } else if (cropIndex !== -1) {
-                const dotIndex = url.indexOf('.', cropIndex);
-                return url.substring(0, scaleIndex) + url.substring(dotIndex);
-            } else if (scaleIndex !== -1) {
-                const dotIndex = url.indexOf('.', scaleIndex);
-                return url.substring(0, cropIndex) + url.substring(dotIndex);
-            }
-            return url;
-        });
+        modifiedImageUrls = ss4Images(modifiedImageUrls, imageUrls);
     }
 
     if (type === 'ss3') {
-        // Modify image URLs to remove "_resampled/Fill" and succeeding characters until the first slash
-        modifiedImageUrls = imageUrls.map(url => {
-            const fillIndex = url.indexOf('/_resampled/Fill');
-            const cropIndex = url.indexOf('/_resampled/Crop');
-            const scaleIndex = url.indexOf('/_resampled/Scale');
-            if (fillIndex !== -1) {
-                const slashIndex = url.indexOf('/', fillIndex);
-                return url.substring(0, fillIndex) + url.substring(slashIndex);
-            } else if (cropIndex !== -1) {
-                const slashIndex = url.indexOf('/', cropIndex);
-                return url.substring(0, cropIndex) + url.substring(slashIndex);
-            } else if (scaleIndex !== -1) {
-                const slashIndex = url.indexOf('/', scaleIndex);
-                return url.substring(0, scaleIndex) + url.substring(slashIndex);
-            }
-            return url;
-        });
+        modifiedImageUrls = ss3Images(modifiedImageUrls, imageUrls);
     }
-    
+
+    if (type === 'default') {
+        modifiedImageUrls = imageUrls;
+    }
+
     // Create the images directory if it doesn't exist
     const imagesDir = path.resolve(__dirname, 'grabbedImages');
     if (!fs.existsSync(imagesDir)) {
@@ -117,7 +89,49 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     const fileContent = `URL: ${url}\nType: ${type}\n\n${modifiedImageUrls.join('\n')}`;
     fs.writeFileSync('grabbedImages.txt', fileContent);
 
-    console.log('Image URLs saved to imageUrls.txt');
+    console.log('Image URLs saved to grabbedImages.txt');
 
     await browser.close();
 })();
+
+function ss4Images(modifiedImageUrls, imageUrls) {
+    modifiedImageUrls = imageUrls.map(url => {
+        const fillIndex = url.indexOf('__Fill');
+        const cropIndex = url.indexOf('__Crop');
+        const scaleIndex = url.indexOf('__Scale');
+        if (fillIndex !== -1) {
+            const dotIndex = url.indexOf('.', fillIndex);
+            return url.substring(0, fillIndex) + url.substring(dotIndex);
+        } else if (cropIndex !== -1) {
+            const dotIndex = url.indexOf('.', cropIndex);
+            return url.substring(0, scaleIndex) + url.substring(dotIndex);
+        } else if (scaleIndex !== -1) {
+            const dotIndex = url.indexOf('.', scaleIndex);
+            return url.substring(0, cropIndex) + url.substring(dotIndex);
+        }
+        return url;
+    });
+    return modifiedImageUrls;
+}
+
+function ss3Images(modifiedImageUrls, imageUrls) {
+    // Modify image URLs to remove "_resampled/Fill" and succeeding characters until the first slash
+    modifiedImageUrls = imageUrls.map(url => {
+        const fillIndex = url.indexOf('/_resampled/Fill');
+        const cropIndex = url.indexOf('/_resampled/Crop');
+        const scaleIndex = url.indexOf('/_resampled/Scale');
+        if (fillIndex !== -1) {
+            const slashIndex = url.indexOf('/', fillIndex);
+            return url.substring(0, fillIndex) + url.substring(slashIndex);
+        } else if (cropIndex !== -1) {
+            const slashIndex = url.indexOf('/', cropIndex);
+            return url.substring(0, cropIndex) + url.substring(slashIndex);
+        } else if (scaleIndex !== -1) {
+            const slashIndex = url.indexOf('/', scaleIndex);
+            return url.substring(0, scaleIndex) + url.substring(slashIndex);
+        }
+        return url;
+    });
+    return modifiedImageUrls;
+}
+
