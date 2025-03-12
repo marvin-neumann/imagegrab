@@ -47,7 +47,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
                 return url.substring(0, fillIndex) + url.substring(dotIndex);
             } else if (cropIndex !== -1) {
                 const dotIndex = url.indexOf('.', cropIndex);
-                return url.substring(0, cropIndex) + url.substring(dotIndex);
+                return url.substring(0, scaleIndex) + url.substring(dotIndex);
             } else if (scaleIndex !== -1) {
                 const dotIndex = url.indexOf('.', scaleIndex);
                 return url.substring(0, cropIndex) + url.substring(dotIndex);
