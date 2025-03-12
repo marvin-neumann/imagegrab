@@ -55,6 +55,22 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
             return url;
         });
     }
+
+    if (type === 'ss3') {
+        // Modify image URLs to remove "_resampled/Fill" and succeeding characters until the first slash
+        modifiedImageUrls = imageUrls.map(url => {
+            const fillIndex = url.indexOf('_resampled/Fill');
+            const cropIndex = url.indexOf('_resampled/Crop');
+            if (fillIndex !== -1) {
+                const dotIndex = url.indexOf('/', fillIndex);
+                return url.substring(0, fillIndex) + url.substring(dotIndex);
+            } else if (cropIndex !== -1) {
+                const dotIndex = url.indexOf('/', cropIndex);
+                return url.substring(0, cropIndex) + url.substring(dotIndex);
+            }
+            return url;
+        });
+    }
     
     // Create the images directory if it doesn't exist
     const imagesDir = path.resolve(__dirname, 'grabbedImages');
