@@ -35,23 +35,26 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
         return [...new Set(urls)];
     });
 
-    // Modify image URLs to remove "__Fill" or "__Crop" and succeeding characters until the first dot
-    const modifiedImageUrls = imageUrls.map(url => {
-        const fillIndex = url.indexOf('__Fill');
-        const cropIndex = url.indexOf('__Crop');
-        const scaleIndex = url.indexOf('__Scale');
-        if (fillIndex !== -1) {
-            const dotIndex = url.indexOf('.', fillIndex);
-            return url.substring(0, fillIndex) + url.substring(dotIndex);
-        } else if (cropIndex !== -1) {
-            const dotIndex = url.indexOf('.', cropIndex);
-            return url.substring(0, cropIndex) + url.substring(dotIndex);
-        } else if (scaleIndex !== -1) {
-            const dotIndex = url.indexOf('.', scaleIndex);
-            return url.substring(0, cropIndex) + url.substring(dotIndex);
-        }
-        return url;
-    });
+    let modifiedImageUrls = imageUrls;
+    if (type === 'ss4') {
+        // Modify image URLs to remove "__Fill" or "__Crop" and succeeding characters until the first dot
+        modifiedImageUrls = imageUrls.map(url => {
+            const fillIndex = url.indexOf('__Fill');
+            const cropIndex = url.indexOf('__Crop');
+            const scaleIndex = url.indexOf('__Scale');
+            if (fillIndex !== -1) {
+                const dotIndex = url.indexOf('.', fillIndex);
+                return url.substring(0, fillIndex) + url.substring(dotIndex);
+            } else if (cropIndex !== -1) {
+                const dotIndex = url.indexOf('.', cropIndex);
+                return url.substring(0, cropIndex) + url.substring(dotIndex);
+            } else if (scaleIndex !== -1) {
+                const dotIndex = url.indexOf('.', scaleIndex);
+                return url.substring(0, cropIndex) + url.substring(dotIndex);
+            }
+            return url;
+        });
+    }
     
     // Create the images directory if it doesn't exist
     const imagesDir = path.resolve(__dirname, 'grabbedImages');
