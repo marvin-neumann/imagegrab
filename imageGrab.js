@@ -7,9 +7,13 @@ const download = require('image-downloader');
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
 const url = args.url || process.argv[2]; // Default URL if --url parameter is not provided
+const type = args.type || 'default'; // Optional type parameter with default value 'default'
 if (!url) {
     console.error('Please provide a URL as a command-line parameter');
     process.exit(1);
+}
+if (!type) {
+    console.error('No type given as a command-line parameter, using `default` type.');
 }
 
 // Read Puppeteer options from JSON file
@@ -55,12 +59,19 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
         fs.mkdirSync(imagesDir);
     }
 
+    // Create a subdirectory using the domain name of the URL parameter
+    const urlObj = new URL(url);
+    const domainDir = path.join(imagesDir, urlObj.hostname);
+    if (!fs.existsSync(domainDir)) {
+        fs.mkdirSync(domainDir);
+    }
+
     // Download each image and save it to the images directory
     for (const imageUrl of modifiedImageUrls) {
         try {
             const urlPath = new URL(imageUrl).pathname;
             const subDir = path.dirname(urlPath);
-            const destDir = path.join(imagesDir, subDir);
+            const destDir = path.join(domainDir, subDir);
 
             // Create subdirectories if they don't exist
             if (!fs.existsSync(destDir)) {
