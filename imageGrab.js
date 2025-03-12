@@ -19,12 +19,6 @@ if (!url) {
     console.error('Please provide a URL as a command-line parameter');
     process.exit(1);
 }
-if (!type) {
-    console.error('No type given as a command-line parameter, using `default`.');
-}
-if (!log) {
-    console.error('No log given as a command-line parameter, using `false`.');
-}
 
 // Read Puppeteer options from JSON file
 const optionsFilePath = path.resolve(__dirname, 'puppeteerOptions.json');
