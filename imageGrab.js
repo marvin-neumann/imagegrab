@@ -37,17 +37,19 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
 
     let modifiedImageUrls = [];
     if (type === 'ss4') {
-        modifiedImageUrls = ss4Images(modifiedImageUrls, imageUrls);
+        modifiedImageUrls = ss4Images(imageUrls);
     }
 
     if (type === 'ss3') {
-        modifiedImageUrls = ss3Images(modifiedImageUrls, imageUrls);
+        modifiedImageUrls = ss3Images(imageUrls);
     }
 
     if (type === 'default') {
         modifiedImageUrls = imageUrls;
     }
 
+    console.log(modifiedImageUrls);
+    
     // Create the images directory if it doesn't exist
     const imagesDir = path.resolve(__dirname, 'grabbedImages');
     if (!fs.existsSync(imagesDir)) {
@@ -94,7 +96,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     await browser.close();
 })();
 
-function ss4Images(modifiedImageUrls, imageUrls) {
+function ss4Images(imageUrls) {
     modifiedImageUrls = imageUrls.map(url => {
         const fillIndex = url.indexOf('__Fill');
         const cropIndex = url.indexOf('__Crop');
@@ -111,11 +113,11 @@ function ss4Images(modifiedImageUrls, imageUrls) {
         }
         return url;
     });
+
     return modifiedImageUrls;
 }
 
-function ss3Images(modifiedImageUrls, imageUrls) {
-    // Modify image URLs to remove "_resampled/Fill" and succeeding characters until the first slash
+function ss3Images(imageUrls) {
     modifiedImageUrls = imageUrls.map(url => {
         const fillIndex = url.indexOf('/_resampled/Fill');
         const cropIndex = url.indexOf('/_resampled/Crop');
@@ -132,6 +134,7 @@ function ss3Images(modifiedImageUrls, imageUrls) {
         }
         return url;
     });
+
     return modifiedImageUrls;
 }
 
