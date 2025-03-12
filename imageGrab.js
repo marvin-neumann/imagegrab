@@ -25,7 +25,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
 (async () => {
     const browser = await puppeteer.launch(puppeteerOptions);
     const page = await browser.newPage();
-    await page.goto(url); // Use the URL from the --url parameter or the default URL
+    await page.goto(url, { waitUntil: 'networkidle2' }); // Wait for the page to load all scripts and events
 
     // Extract image URLs, filter out base64 encoded images, and remove duplicates
     const imageUrls = await page.evaluate(() => {
@@ -33,8 +33,32 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
             .map(img => img.src)
             .filter(url => !url.startsWith('data:'));
 
-        // Remove duplicates
-        return [...new Set(urls)];
+        // Extract image URLs from stylesheets
+        const styleUrls = Array.from(document.styleSheets)
+            .flatMap(sheet => Array.from(sheet.cssRules))
+            .filter(rule => rule.style && (rule.style.backgroundImage || rule.style.background))
+            .map(rule => {
+            const urlMatch = rule.style.backgroundImage || rule.style.background;
+            const url = urlMatch.match(/url\(["']?([^"')]+)["']?\)/);
+            return url ? url[1] : null;
+            })
+            .filter(url => url && !url.startsWith('data:'));
+
+        // Extract image URLs from inline styles
+        const inlineStyleUrls = Array.from(document.querySelectorAll('*'))
+            .map(element => {
+            const style = window.getComputedStyle(element);
+            const backgroundImage = style.backgroundImage;
+            const background = style.background;
+            const urlMatch = backgroundImage || background;
+            const url = urlMatch.match(/url\(["']?([^"')]+)["']?\)/);
+            return url ? url[1] : null;
+            })
+            .filter(url => url && !url.startsWith('data:'));
+
+            console.log('inlineStyleUrls', inlineStyleUrls);
+        // Combine and remove duplicates
+        return [...new Set([...urls, ...styleUrls, ...inlineStyleUrls])];
     });
 
     let modifiedImageUrls = [];
