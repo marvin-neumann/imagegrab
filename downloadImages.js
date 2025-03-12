@@ -5,6 +5,13 @@ const path = require('path');
 
 
 
+/**
+ * Downloads images from the provided URLs and saves them to the specified directory.
+ *
+ * @param {string[]} modifiedImageUrls - An array of image URLs to download.
+ * @param {string} domainDir - The base directory where images will be saved.
+ * @returns {Promise<void>} A promise that resolves when all images have been downloaded.
+ */
 async function downloadImages(modifiedImageUrls, domainDir) {
     for (const imageUrl of modifiedImageUrls) {
         try {

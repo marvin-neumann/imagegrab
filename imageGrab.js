@@ -2,10 +2,11 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const minimist = require('minimist');
 const path = require('path');
+const download = require('image-downloader');
 const { ss3Images } = require('./ss3Images');
 const { ss4Images } = require('./ss4Images');
-const { logImageUrlsToFile } = require('./logImageUrlsToFile');
 const { downloadImages } = require('./downloadImages');
+const { logImageUrlsToFile } = require('./logImageUrlsToFile');
 
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
@@ -56,8 +57,6 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     if (type === 'default') {
         modifiedImageUrls = imageUrls;
     }
-
-    console.log(modifiedImageUrls);
     
     // Create the images directory if it doesn't exist
     const imagesDir = path.resolve(__dirname, 'grabbedImages');
@@ -77,12 +76,11 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
 
     if (log !== 'false') {
         // Save the image URLs to a text file
-        logImageUrlsToFile(modifiedImageUrls);
+        logImageUrlsToFile(modifiedImageUrls, url, type);
     }
 
     await browser.close();
 })();
-
 
 
 
