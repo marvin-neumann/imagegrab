@@ -7,6 +7,7 @@ const { ss3Images } = require('./app/ss3Images');
 const { ss4Images } = require('./app/ss4Images');
 const { downloadImages } = require('./app/downloadImages');
 const { logImageUrlsToFile } = require('./app/logImageUrlsToFile');
+const { extractImageUrls } = require('./extractImageUrls');
 
 // Parse command-line arguments
 const args = minimist(process.argv.slice(2));
@@ -28,38 +29,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     await page.goto(url, { waitUntil: 'networkidle2' }); // Wait for the page to load all scripts and events
 
     // Extract image URLs, filter out base64 encoded images, and remove duplicates
-    const imageUrls = await page.evaluate(() => {
-        const urls = Array.from(document.querySelectorAll('img'))
-            .map(img => img.src)
-            .filter(url => !url.startsWith('data:'));
-
-        // Extract image URLs from stylesheets
-        const styleUrls = Array.from(document.styleSheets)
-            .flatMap(sheet => Array.from(sheet.cssRules))
-            .filter(rule => rule.style && (rule.style.backgroundImage || rule.style.background))
-            .map(rule => {
-            const urlMatch = rule.style.backgroundImage || rule.style.background;
-            const url = urlMatch.match(/url\(["']?([^"')]+)["']?\)/);
-            return url ? url[1] : null;
-            })
-            .filter(url => url && !url.startsWith('data:'));
-
-        // Extract image URLs from inline styles
-        const inlineStyleUrls = Array.from(document.querySelectorAll('*'))
-            .map(element => {
-            const style = window.getComputedStyle(element);
-            const backgroundImage = style.backgroundImage;
-            const background = style.background;
-            const urlMatch = backgroundImage || background;
-            const url = urlMatch.match(/url\(["']?([^"')]+)["']?\)/);
-            return url ? url[1] : null;
-            })
-            .filter(url => url && !url.startsWith('data:'));
-
-            console.log('inlineStyleUrls', inlineStyleUrls);
-        // Combine and remove duplicates
-        return [...new Set([...urls, ...styleUrls, ...inlineStyleUrls])];
-    });
+    const imageUrls = await extractImageUrls(page);
 
     let modifiedImageUrls = [];
     if (type === 'ss4') {
@@ -97,6 +67,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
 
     await browser.close();
 })();
+
 
 
 
