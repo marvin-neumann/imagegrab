@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 const minimist = require('minimist');
+const path = require('path');
+const fs = require('fs');
 
 
 // Parse command-line arguments
@@ -23,9 +25,10 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     // Get all internal links
     const internalLinks = await page.evaluate(() => {
         const anchors = Array.from(document.querySelectorAll('a'));
-        return anchors
-            .map(anchor => anchor.href)
-            .filter(href => href.startsWith(window.location.origin));
+        const hrefs = anchors
+            .map(anchor => anchor.href.replace(/#$/, '')) // Remove trailing # character
+            .filter(href => href.startsWith(window.location.origin) && href.trim() !== '');
+        return [...new Set(hrefs)]; // Remove duplicates
     });
 
     console.log(internalLinks);
