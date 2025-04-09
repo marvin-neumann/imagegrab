@@ -5,6 +5,6 @@
  * @returns {string[]} An array of processed image URLs with the resampling part removed.
  */
 function ss3Images(urls) {
-    return urls.map(url => url.replace(/\/_resampled\/[^/]+\//, '/'));
+    return urls.map(url => url.replace(/\/_resampled\/[^/]+\//, '/').replace(/(\.(?:jpg|jpeg|png|gif))\?.*$/, '$1'));
 }
 exports.ss3Images = ss3Images;
