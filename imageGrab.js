@@ -28,6 +28,21 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' }); // Wait for the page to load all scripts and events
 
+    await page.evaluate(async () => {
+        await new Promise((resolve) => {
+            let totalHeight = 0;
+            const distance = 100;
+            const delay = 200;
+            const timer = setInterval(() => {
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+                if (totalHeight >= document.body.scrollHeight - window.innerHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, delay);
+        });
+    });
     // Extract image URLs, filter out base64 encoded images, and remove duplicates
     const imageUrls = await extractImageUrls(page);
 
