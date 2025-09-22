@@ -26,7 +26,28 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
 (async () => {
     const browser = await puppeteer.launch(puppeteerOptions);
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' }); // Wait for the page to load all scripts and events
+
+    // Optional Basic Auth from environment file
+    const envPath = path.resolve(__dirname, 'puppeteerAuth.env');
+    if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        const lines = envContent.split('\n');
+        let username = '', password = '';
+        for (const line of lines) {
+            if (line.startsWith('USERNAME=')) {
+                username = line.replace('USERNAME=', '').trim();
+            }
+            if (line.startsWith('PASSWORD=')) {
+                password = line.replace('PASSWORD=', '').trim();
+            }
+        }
+        if (username && password) {
+            await page.authenticate({ username, password });
+        }
+    }
+
+    // Wait for the page to load all scripts and events
+    await page.goto(url, { waitUntil: 'networkidle2' });
 
     await page.evaluate(async () => {
         await new Promise((resolve) => {

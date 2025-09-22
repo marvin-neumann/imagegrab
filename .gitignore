@@ -9,3 +9,6 @@ node_modules/
 # output
 grabbedImages/
 grabbedImages.txt
+
+# env files
+*.env
