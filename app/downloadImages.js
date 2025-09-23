@@ -24,9 +24,31 @@ async function downloadImages(modifiedImageUrls, domainDir) {
                 fs.mkdirSync(destDir, { recursive: true });
             }
 
+            // Load basic auth credentials from puppeteerAuth.env if available
+            let headers = {};
+            const envPath = path.resolve(__dirname, '../puppeteerAuth.env');
+            if (fs.existsSync(envPath)) {
+                const envContent = fs.readFileSync(envPath, 'utf-8');
+                const lines = envContent.split('\n');
+                let username = '', password = '';
+                for (const line of lines) {
+                    if (line.startsWith('USERNAME=')) {
+                        username = line.replace('USERNAME=', '').trim();
+                    }
+                    if (line.startsWith('PASSWORD=')) {
+                        password = line.replace('PASSWORD=', '').trim();
+                    }
+                }
+                if (username && password) {
+                    const auth = Buffer.from(`${username}:${password}`).toString('base64');
+                    headers['Authorization'] = `Basic ${auth}`;
+                }
+            }
+
             const options = {
                 url: imageUrl,
-                dest: path.join(destDir, path.basename(imageUrl))
+                dest: path.join(destDir, path.basename(imageUrl)),
+                headers: Object.keys(headers).length ? headers : undefined
             };
 
             await download.image(options);
