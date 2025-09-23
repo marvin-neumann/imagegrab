@@ -52,8 +52,8 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     await page.evaluate(async () => {
         await new Promise((resolve) => {
             let totalHeight = 0;
-            const distance = 100;
-            const delay = 200;
+            const distance = 500;
+            const delay = 400;
             const timer = setInterval(() => {
                 window.scrollBy(0, distance);
                 totalHeight += distance;
