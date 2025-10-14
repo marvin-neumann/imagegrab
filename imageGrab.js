@@ -15,6 +15,7 @@ const url = args.url || process.argv[2]; // Default URL if --url parameter is no
 const type = args.type || 'default'; // Optional type parameter with default value 'default'
 const log = args.log || 'false'; // Optional log parameter with default value 'false'
 const useBasicAuth = args.auth || args.basicauth || 'false'; // Optional basic auth parameter with default value 'false'
+const useFormAuth = args.formauth || args.form || 'false'; // Optional form auth parameter with default value 'false'
 if (!url) {
     console.error('Please provide a URL as a command-line parameter');
     console.log('Usage: node imageGrab.js <URL> [options]');
@@ -24,6 +25,8 @@ if (!url) {
     console.log('  --log=<true|false>    Log URLs to file (default: false)');
     console.log('  --auth=<true|false>   Use basic authentication (default: false)');
     console.log('  --basicauth=<true|false>  Alias for --auth');
+    console.log('  --formauth=<true|false>   Use form authentication (default: false)');
+    console.log('  --form=<true|false>   Alias for --formauth');
     process.exit(1);
 }
 
@@ -59,6 +62,65 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     }
 
     // Optional fill in Form Auth from environment file
+    if (useFormAuth !== 'false') {
+        const envPath = path.resolve(__dirname, 'puppeteerAuth.env');
+        if (fs.existsSync(envPath)) {
+            const envContent = fs.readFileSync(envPath, 'utf8');
+            const lines = envContent.split('\n');
+            let username = '', password = '', loginUrl = '', usernameSelector = '', passwordSelector = '', submitSelector = '';
+            
+            for (const line of lines) {
+                if (line.startsWith('FORM_USERNAME=')) {
+                    username = line.replace('FORM_USERNAME=', '').trim();
+                }
+                if (line.startsWith('FORM_PASSWORD=')) {
+                    password = line.replace('FORM_PASSWORD=', '').trim();
+                }
+                if (line.startsWith('FORM_LOGIN_URL=')) {
+                    loginUrl = line.replace('FORM_LOGIN_URL=', '').trim();
+                }
+                if (line.startsWith('FORM_USERNAME_SELECTOR=')) {
+                    usernameSelector = line.replace('FORM_USERNAME_SELECTOR=', '').trim();
+                }
+                if (line.startsWith('FORM_PASSWORD_SELECTOR=')) {
+                    passwordSelector = line.replace('FORM_PASSWORD_SELECTOR=', '').trim();
+                }
+                if (line.startsWith('FORM_SUBMIT_SELECTOR=')) {
+                    submitSelector = line.replace('FORM_SUBMIT_SELECTOR=', '').trim();
+                }
+            }
+            
+            if (username && password && loginUrl && usernameSelector && passwordSelector && submitSelector) {
+                try {
+                    console.log('Performing form authentication...');
+                    
+                    // Navigate to login page
+                    await page.goto(loginUrl, { waitUntil: 'networkidle2' });
+                    
+                    // Fill in login form
+                    await page.waitForSelector(usernameSelector, { timeout: 10000 });
+                    await page.type(usernameSelector, username);
+                    await page.type(passwordSelector, password);
+                    
+                    // Submit form and wait for navigation
+                    await Promise.all([
+                        page.waitForNavigation({ waitUntil: 'networkidle2' }),
+                        page.click(submitSelector)
+                    ]);
+                    
+                    console.log('Form authentication completed successfully');
+                } catch (error) {
+                    console.error(`Form authentication failed: ${error.message}`);
+                    console.error('Please check your form selectors and login credentials');
+                }
+            } else {
+                console.warn('Form auth flag is set but required form auth credentials/selectors are missing in puppeteerAuth.env');
+                console.warn('Required: FORM_USERNAME, FORM_PASSWORD, FORM_LOGIN_URL, FORM_USERNAME_SELECTOR, FORM_PASSWORD_SELECTOR, FORM_SUBMIT_SELECTOR');
+            }
+        } else {
+            console.warn('Form auth flag is set but puppeteerAuth.env file not found');
+        }
+    }
 
     // Wait for the page to load all scripts and events
     await page.goto(url, { waitUntil: 'networkidle2' });
