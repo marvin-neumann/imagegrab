@@ -34,3 +34,19 @@ webimage_extra_packages: [chromium]
     - default type is `default` and will download all images, 
     - `ss3` and `ss4` downloads only the origial images and ignores scaled and cropped images
  - `--log` optional, default is false, if true Logs the modified image URLs to a file along with the original URL and type
+ - `--auth` or `--basicauth` optional, default is false, if true enables HTTP Basic Authentication using credentials from `puppeteerAuth.env`
+
+## Basic Authentication
+
+To use HTTP Basic Authentication, create a file named `puppeteerAuth.env` in the project root with the following format:
+
+```
+USERNAME=your_username
+PASSWORD=your_password
+```
+
+Then run the script with the `--auth=true` flag:
+
+```bash
+node imageGrab.js --url=https://www.example.com --auth=true
+```

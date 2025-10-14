@@ -14,8 +14,16 @@ const args = minimist(process.argv.slice(2));
 const url = args.url || process.argv[2]; // Default URL if --url parameter is not provided
 const type = args.type || 'default'; // Optional type parameter with default value 'default'
 const log = args.log || 'false'; // Optional log parameter with default value 'false'
+const useBasicAuth = args.auth || args.basicauth || 'false'; // Optional basic auth parameter with default value 'false'
 if (!url) {
     console.error('Please provide a URL as a command-line parameter');
+    console.log('Usage: node imageGrab.js <URL> [options]');
+    console.log('Options:');
+    console.log('  --url=<URL>           Target URL to scrape');
+    console.log('  --type=<default|ss3|ss4>  Image processing type (default: default)');
+    console.log('  --log=<true|false>    Log URLs to file (default: false)');
+    console.log('  --auth=<true|false>   Use basic authentication (default: false)');
+    console.log('  --basicauth=<true|false>  Alias for --auth');
     process.exit(1);
 }
 
@@ -28,23 +36,29 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     const page = await browser.newPage();
 
     // Optional Basic Auth from environment file
-    const envPath = path.resolve(__dirname, 'puppeteerAuth.env');
-    if (fs.existsSync(envPath)) {
-        const envContent = fs.readFileSync(envPath, 'utf8');
-        const lines = envContent.split('\n');
-        let username = '', password = '';
-        for (const line of lines) {
-            if (line.startsWith('USERNAME=')) {
-                username = line.replace('USERNAME=', '').trim();
+    if (useBasicAuth !== 'false') {
+        const envPath = path.resolve(__dirname, 'puppeteerAuth.env');
+        if (fs.existsSync(envPath)) {
+            const envContent = fs.readFileSync(envPath, 'utf8');
+            const lines = envContent.split('\n');
+            let username = '', password = '';
+            for (const line of lines) {
+                if (line.startsWith('USERNAME=')) {
+                    username = line.replace('USERNAME=', '').trim();
+                }
+                if (line.startsWith('PASSWORD=')) {
+                    password = line.replace('PASSWORD=', '').trim();
+                }
             }
-            if (line.startsWith('PASSWORD=')) {
-                password = line.replace('PASSWORD=', '').trim();
+            if (username && password) {
+                await page.authenticate({ username, password });
             }
-        }
-        if (username && password) {
-            await page.authenticate({ username, password });
+        } else {
+            console.warn('Basic auth flag is set but puppeteerAuth.env file not found');
         }
     }
+
+    // Optional fill in Form Auth from environment file
 
     // Wait for the page to load all scripts and events
     await page.goto(url, { waitUntil: 'networkidle2' });
@@ -94,7 +108,7 @@ const puppeteerOptions = JSON.parse(fs.readFileSync(optionsFilePath, 'utf8'));
     }
 
     // Download each image and save it to the images directory
-    await downloadImages(modifiedImageUrls, domainDir);
+    await downloadImages(modifiedImageUrls, domainDir, useBasicAuth);
 
     if (log !== 'false') {
         // Save the image URLs to a text file

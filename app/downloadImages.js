@@ -10,9 +10,10 @@ const path = require('path');
  *
  * @param {string[]} modifiedImageUrls - An array of image URLs to download.
  * @param {string} domainDir - The base directory where images will be saved.
+ * @param {string} useBasicAuth - Whether to use basic authentication (default: 'false').
  * @returns {Promise<void>} A promise that resolves when all images have been downloaded.
  */
-async function downloadImages(modifiedImageUrls, domainDir) {
+async function downloadImages(modifiedImageUrls, domainDir, useBasicAuth = 'false') {
     for (const imageUrl of modifiedImageUrls) {
         try {
             const urlPath = new URL(imageUrl).pathname;
@@ -26,22 +27,26 @@ async function downloadImages(modifiedImageUrls, domainDir) {
 
             // Load basic auth credentials from puppeteerAuth.env if available
             let headers = {};
-            const envPath = path.resolve(__dirname, '../puppeteerAuth.env');
-            if (fs.existsSync(envPath)) {
-                const envContent = fs.readFileSync(envPath, 'utf-8');
-                const lines = envContent.split('\n');
-                let username = '', password = '';
-                for (const line of lines) {
-                    if (line.startsWith('USERNAME=')) {
-                        username = line.replace('USERNAME=', '').trim();
+            if (useBasicAuth !== 'false') {
+                const envPath = path.resolve(__dirname, '../puppeteerAuth.env');
+                if (fs.existsSync(envPath)) {
+                    const envContent = fs.readFileSync(envPath, 'utf-8');
+                    const lines = envContent.split('\n');
+                    let username = '', password = '';
+                    for (const line of lines) {
+                        if (line.startsWith('USERNAME=')) {
+                            username = line.replace('USERNAME=', '').trim();
+                        }
+                        if (line.startsWith('PASSWORD=')) {
+                            password = line.replace('PASSWORD=', '').trim();
+                        }
                     }
-                    if (line.startsWith('PASSWORD=')) {
-                        password = line.replace('PASSWORD=', '').trim();
+                    if (username && password) {
+                        const auth = Buffer.from(`${username}:${password}`).toString('base64');
+                        headers['Authorization'] = `Basic ${auth}`;
                     }
-                }
-                if (username && password) {
-                    const auth = Buffer.from(`${username}:${password}`).toString('base64');
-                    headers['Authorization'] = `Basic ${auth}`;
+                } else {
+                    console.warn('Basic auth flag is set but puppeteerAuth.env file not found');
                 }
             }
 
